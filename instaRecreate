@@ -1,0 +1,210 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  SafeAreaView,
+  StatusBar,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+const image = require('./assets/instagram.png');
+const postsData = [
+  {
+    id: '1',
+    username: 'ananya_a',
+    profilePicture: require('./assets/snack-icon.png'),
+    image: require('./assets/snack-icon.png'),
+    caption: 'Loving this view!',
+    likesCount: 0,
+  },
+  {
+    id: '2',
+    username: 'kavya_k',
+    caption: 'Me and the mountains',
+    likesCount: 0,
+  },
+  { id: '3', 
+  username: 'anshika_d', 
+  caption: 'Work life', 
+  likesCount: 0 },
+];
+
+const HomeScreen = ({ navigation }) => {
+  const [posts, likedPosts] = useState(postsData);
+
+  const toggleLike = (postId) => {
+    const updatedPosts = posts.map((post) => {
+      if (post.id == postId) {
+        const isLiked = !post.isLiked;
+        const likesCount = isLiked ? post.likesCount + 1 : post.likesCount - 1;
+        return { ...post, isLiked, likesCount };
+      }
+      return post;
+    });
+    likedPosts(updatedPosts);
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="light" />
+
+      <FlatList
+        data={posts}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={styles.post}>
+            <View style={styles.postHeader}>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('Profile', { username: item.username })
+                }>
+                <Image
+                  source={image}
+                  style={styles.profilePicture}
+                />
+              </TouchableOpacity>
+              <Text style={styles.username}>{item.username}</Text>
+            </View>
+            {item.image ? (
+              <Image source={item.image} style={styles.postImage} />
+            ) : ( <View style={styles.placeholderImage}>
+                <Text>cannot upload </Text>
+              </View>
+            )}
+            <View style={styles.postFooter}>
+              <TouchableOpacity onPress={() => toggleLike(item.id)}>
+                <MaterialCommunityIcons
+                  name={item.isLiked ? 'heart' : 'heart-outline'}
+                  size={24}
+                  color={item.isLiked ? 'red' : 'black'}
+                />
+              </TouchableOpacity>
+              <Text style={styles.likesCount}>{item.likesCount}</Text>
+              <TouchableOpacity style={styles.commentButton}>
+                <Ionicons name="chatbubble-outline" size={24} color="black" />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.caption}>{item.caption}</Text>
+          </View>
+        )}
+      />
+    </SafeAreaView>
+  );
+};
+
+const MessagesScreen = () => {
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text>hi</Text>
+    </SafeAreaView>
+  );
+};
+
+const Tab = createBottomTabNavigator();
+
+const AppNavigator = () => {
+  return (
+    <NavigationContainer>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
+            if (route.name === 'instagram') {
+              iconName = focused ? 'home' : 'home-outline';
+            } else if (route.name === 'Messages') {
+              iconName = focused ? 'message' : 'message-outline';
+            }
+            return (
+              <MaterialCommunityIcons
+                name={iconName}
+                size={size}
+                color={color}
+              />
+            );
+          },
+          tabBarActiveTintColor: 'black',
+          tabBarInactiveTintColor: 'gray',
+          tabBarLabelStyle: { display: 'none' },
+        })}>
+        <Tab.Screen name="instagram" component={HomeScreen} />
+        <Tab.Screen name="Messages" component={MessagesScreen} />
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
+};
+
+export default function App() {
+  return <AppNavigator />;
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
+
+  header: {
+    paddingTop: 30,
+    paddingBottom: 10,
+    backgroundColor: '#fff',
+    marginLeft: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    alignItems: 'left',
+  },
+  // iconName: {
+  //   fontSize: 20,
+  //   fontWeight: 'bold',
+  // },
+
+  post: {
+    marginBottom: 10,
+  },
+  postHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+  },
+  profilePicture: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  username: {
+    fontWeight: 'bold',
+  },
+  postImage: {
+    width: '100%',
+    height: 400,
+  },
+  placeholderImage: {
+    width: '100%',
+    height: 400,
+    backgroundColor: '#ddd',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  postFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+  },
+  caption: {
+    marginTop: 5,
+    marginLeft: 5,
+    fontSize: 16,
+  },
+  commentButton: {
+    marginLeft: 10,
+  },
+  likesCount: {
+    marginLeft: 5,
+    fontSize: 16,
+  },
+});
