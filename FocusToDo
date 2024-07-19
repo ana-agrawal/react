@@ -1,0 +1,136 @@
+import React, { useState } from 'react';
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  TextInput,
+  StyleSheet,
+  ScrollView,
+  Platform,
+  SafeAreaView,
+  StatusBar,
+} from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import {Onboard} from './components/Onboard'
+export default function App() {
+  const [enteredGoal, setEnteredGoal] = useState('');
+  const [currentGoals, setCurrentGoals] = useState([]);
+
+  const InputGoal = (enteredText) => {
+    setEnteredGoal(enteredText);
+  };
+
+  const addGoal = () => {
+    if (enteredGoal.trim().length === 0) {
+      return; 
+    }
+    setCurrentGoals([...currentGoals, { text: enteredGoal, finished: false }]);
+    setEnteredGoal('');
+  };
+
+  const goalStatus = (index) => {
+    const updatedGoals = [...currentGoals];
+    updatedGoals[index].finished = !updatedGoals[index].finished;
+    setCurrentGoals(updatedGoals);
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.appContainer}>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.textInput}
+            placeholder="What would you like to focus on?"
+            onChangeText={InputGoal}
+            value={enteredGoal}
+          />
+          <TouchableOpacity style={styles.buttonContainer} onPress={addGoal}>
+            <Text style={styles.buttonText}>+</Text>
+          </TouchableOpacity>
+        </View>
+        <ScrollView style={styles.goalContainer}>
+          {currentGoals.map((goal, index) => (    
+            <TouchableOpacity
+              style={styles.goalItem}
+              key={index}
+              onPress={() => goalStatus(index)}
+            >
+              <MaterialCommunityIcons
+                name={
+                  goal.finished
+                    ? 'checkbox-marked-circle-outline'
+                    : 'checkbox-blank-circle-outline'
+                }
+                size={24}
+                color={goal.finished ? 'green' : 'dimgray'}
+              />
+              <Text style={[styles.wrappedText, goal.finished && styles.finishedText]}>
+                {goal.text}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#252250',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+  appContainer: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    paddingTop: 40,
+    paddingHorizontal: 30,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  textInput: {
+    flex: 1,
+    height: 40,
+    color: 'white',
+    borderColor: 'white',
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    marginRight: 10,
+  },
+  buttonContainer: {
+    width: 40, 
+    height: 40,
+    borderRadius: 30,
+    backgroundColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 20,
+  },
+  goalContainer: {
+    flex: 1,
+  },
+  goalItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    padding: 8,
+    backgroundColor: '#d3d3d3',
+    borderRadius: 6,
+  },
+  wrappedText: {
+    flex: 1,
+    marginLeft: 10,
+    fontSize: 18,
+    color: 'black',
+  },
+  finishedText: {
+    textDecorationLine: 'line-through',
+    color: 'gray',
+  },
+});
